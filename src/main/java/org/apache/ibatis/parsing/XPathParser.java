@@ -41,6 +41,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
 /**
+ * xml解析器
  * @author Clinton Begin
  * @author Kazuki Shimizu
  */
@@ -122,6 +123,7 @@ public class XPathParser {
     this.document = createDocument(new InputSource(reader));
   }
 
+  // true
   public XPathParser(InputStream inputStream, boolean validation, Properties variables, EntityResolver entityResolver) {
     commonConstructor(validation, variables, entityResolver);
     this.document = createDocument(new InputSource(inputStream));

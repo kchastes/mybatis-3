@@ -33,6 +33,7 @@ import org.apache.ibatis.io.ResolverUtil;
 import org.apache.ibatis.io.Resources;
 
 /**
+ * 类型别名注册 key:class
  * @author Clinton Begin
  */
 public class TypeAliasRegistry {
@@ -133,12 +134,13 @@ public class TypeAliasRegistry {
     registerAliases(packageName, Object.class);
   }
 
+  // 包注册别名 通过ResolverUtils查找某个包下是否含有指定的类
   public void registerAliases(String packageName, Class<?> superType) {
     ResolverUtil<Class<?>> resolverUtil = new ResolverUtil<>();
     resolverUtil.find(new ResolverUtil.IsA(superType), packageName);
     Set<Class<? extends Class<?>>> typeSet = resolverUtil.getClasses();
     for (Class<?> type : typeSet) {
-      // Ignore inner classes and interfaces (including package-info.java)
+      // 忽略内部类和接口（包括 package-info.java）
       // Skip also inner classes. See issue #6
       if (!type.isAnonymousClass() && !type.isInterface() && !type.isMemberClass()) {
         registerAlias(type);

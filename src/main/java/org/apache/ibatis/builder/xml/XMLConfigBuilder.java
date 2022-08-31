@@ -48,13 +48,17 @@ import org.apache.ibatis.transaction.TransactionFactory;
 import org.apache.ibatis.type.JdbcType;
 
 /**
+ * xml配置构建器
  * @author Clinton Begin
  * @author Kazuki Shimizu
  */
 public class XMLConfigBuilder extends BaseBuilder {
 
+  // 是否加载过，默认false
   private boolean parsed;
+  // xml解析器
   private final XPathParser parser;
+  // 当前环境标识, 解析配置后默认为default属性的值，如果没有配置则抛出异常
   private String environment;
   private final ReflectorFactory localReflectorFactory = new DefaultReflectorFactory();
 
@@ -78,7 +82,9 @@ public class XMLConfigBuilder extends BaseBuilder {
     this(inputStream, environment, null);
   }
 
+  // 初次 xml null null
   public XMLConfigBuilder(InputStream inputStream, String environment, Properties props) {
+    // 构建xml解析器
     this(new XPathParser(inputStream, true, props, new XMLMapperEntityResolver()), environment, props);
   }
 
@@ -102,18 +108,27 @@ public class XMLConfigBuilder extends BaseBuilder {
 
   private void parseConfiguration(XNode root) {
     try {
-      // issue #117 read properties first
+      // resource和url不能同时配置，优先级：形参(SqlSessionFactoryBuilder.builder())，外部，标签内 , 同时保存在XParse内
       propertiesElement(root.evalNode("properties"));
+      // 获取setting配置值,通过发射获取set方法以判断是否存在该属性值
       Properties settings = settingsAsProperties(root.evalNode("settings"));
       loadCustomVfs(settings);
+      // 设置日志实现 todo 后续研究日志模块
       loadCustomLogImpl(settings);
+      // 别名注册
       typeAliasesElement(root.evalNode("typeAliases"));
+      // 插件注册至拦截器链
       pluginElement(root.evalNode("plugins"));
+      // 注册对象工厂 每次 MyBatis 创建结果对象的新实例时，它都会使用一个对象工厂（ObjectFactory）实例来完成实例化工作
       objectFactoryElement(root.evalNode("objectFactory"));
+      // 对象包装工厂
       objectWrapperFactoryElement(root.evalNode("objectWrapperFactory"));
+      // 发射工厂
       reflectorFactoryElement(root.evalNode("reflectorFactory"));
+      // 通过setting中的元素改变configuration中的默认值
       settingsElement(settings);
       // read it after objectFactory and objectWrapperFactory issue #631
+      // 环境配置
       environmentsElement(root.evalNode("environments"));
       databaseIdProviderElement(root.evalNode("databaseIdProvider"));
       typeHandlerElement(root.evalNode("typeHandlers"));
@@ -128,7 +143,7 @@ public class XMLConfigBuilder extends BaseBuilder {
       return new Properties();
     }
     Properties props = context.getChildrenAsProperties();
-    // Check that all settings are known to the configuration class
+    // 检查配置类是否知道所有设置 通过发射获取set方法判断参数是否存在
     MetaClass metaConfig = MetaClass.forClass(Configuration.class, localReflectorFactory);
     for (Object key : props.keySet()) {
       if (!metaConfig.hasSetter(String.valueOf(key))) {
@@ -153,24 +168,30 @@ public class XMLConfigBuilder extends BaseBuilder {
   }
 
   private void loadCustomLogImpl(Properties props) {
+    // 从别名列表中取对应类信息
     Class<? extends Log> logImpl = resolveClass(props.getProperty("logImpl"));
     configuration.setLogImpl(logImpl);
   }
-
+  // 解析别名
   private void typeAliasesElement(XNode parent) {
     if (parent != null) {
       for (XNode child : parent.getChildren()) {
+        // 包扫描注册 忽略内部类和接口（包括 package-info.java）已存在会抛出异常
         if ("package".equals(child.getName())) {
           String typeAliasPackage = child.getStringAttribute("name");
           configuration.getTypeAliasRegistry().registerAliases(typeAliasPackage);
         } else {
+          // 单个注册
           String alias = child.getStringAttribute("alias");
           String type = child.getStringAttribute("type");
           try {
+            // 先加载类
             Class<?> clazz = Resources.classForName(type);
             if (alias == null) {
+              // 如果别名为空 使用类名称
               typeAliasRegistry.registerAlias(clazz);
             } else {
+              // 否则使用指定别名
               typeAliasRegistry.registerAlias(alias, clazz);
             }
           } catch (ClassNotFoundException e) {
@@ -180,14 +201,24 @@ public class XMLConfigBuilder extends BaseBuilder {
       }
     }
   }
-
+  // 插件注册
+  //<!-- mybatis-config.xml -->
+  //<plugins>
+  //  <plugin interceptor="org.mybatis.example.ExamplePlugin">
+  //    <property name="someProperty" value="100"/>
+  //  </plugin>
+  //</plugins>
   private void pluginElement(XNode parent) throws Exception {
     if (parent != null) {
       for (XNode child : parent.getChildren()) {
         String interceptor = child.getStringAttribute("interceptor");
+        // 获取配置的properties
         Properties properties = child.getChildrenAsProperties();
+        // 从别名列表中获取，没有获取到便加载类，也就是说，interceptor可传别名,如果配置的无法转换为对应类型 则抛出异常
         Interceptor interceptorInstance = (Interceptor) resolveClass(interceptor).getDeclaredConstructor().newInstance();
+        // 设置properties值
         interceptorInstance.setProperties(properties);
+        // 添加到拦截器链
         configuration.addInterceptor(interceptorInstance);
       }
     }
@@ -274,16 +305,23 @@ public class XMLConfigBuilder extends BaseBuilder {
     configuration.setNullableOnForEach(booleanValueOf(props.getProperty("nullableOnForEach"), false));
   }
 
+  // 环境解析
   private void environmentsElement(XNode context) throws Exception {
     if (context != null) {
+      // 如果在创建SqlSessionFactory时指定了environment,就以指定的为准
       if (environment == null) {
         environment = context.getStringAttribute("default");
       }
       for (XNode child : context.getChildren()) {
+        // 针对每一组environment进行解析
         String id = child.getStringAttribute("id");
+        // id必须配置，判断是否是当前激活配置
         if (isSpecifiedEnvironment(id)) {
+          // 加载事务管理器
           TransactionFactory txFactory = transactionManagerElement(child.evalNode("transactionManager"));
+          // 加载数据源配置
           DataSourceFactory dsFactory = dataSourceElement(child.evalNode("dataSource"));
+
           DataSource dataSource = dsFactory.getDataSource();
           Environment.Builder environmentBuilder = new Environment.Builder(id)
               .transactionFactory(txFactory)

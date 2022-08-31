@@ -28,6 +28,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 /**
+ * Node包装对象
  * @author Clinton Begin
  */
 public class XNode {

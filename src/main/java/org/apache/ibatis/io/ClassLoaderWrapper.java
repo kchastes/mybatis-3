@@ -19,13 +19,14 @@ import java.io.InputStream;
 import java.net.URL;
 
 /**
- * A class to wrap access to multiple class loaders making them work as one
+ * 包装多个类加载器
  *
  * @author Clinton Begin
  */
 public class ClassLoaderWrapper {
-
+  // 默认类加载器
   ClassLoader defaultClassLoader;
+  // 系统类加载器
   ClassLoader systemClassLoader;
 
   ClassLoaderWrapper() {
@@ -37,8 +38,7 @@ public class ClassLoaderWrapper {
   }
 
   /**
-   * Get a resource as a URL using the current class path
-   *
+   * 使用当前类路径获取资源作为 URL
    * @param resource - the resource to locate
    * @return the resource or null
    */

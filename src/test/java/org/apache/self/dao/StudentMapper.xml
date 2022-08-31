@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.apache.self.dao.StudentMapper">
+
+  <!-- todo flushCache测试-->
+
+  <select id="selectStudentById" resultType="Student">
+    select *
+    from Student
+    where id = #{id}
+  </select>
+
+  <insert id="insertStudent" parameterType="Student"  keyProperty="id"
+     useGeneratedKeys="true" timeout="20">
+    insert into Student (username,age,birthday,classId)
+    values (#{userName},#{age},#{birthday},#{classId})
+  </insert>
+
+  <!--<update id="updateAuthor" parameterType="domain.blog.Author" flushCache="true" statementType="PREPARED"
+    timeout="20">
+
+  </update>
+
+  <delete id="deleteAuthor" parameterType="domain.blog.Author" flushCache="true" statementType="PREPARED"
+    timeout="20">
+
+  </delete>-->
+
+</mapper>
