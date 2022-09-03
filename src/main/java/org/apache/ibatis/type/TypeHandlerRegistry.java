@@ -335,14 +335,16 @@ public final class TypeHandlerRegistry {
   public <T> void register(TypeHandler<T> typeHandler) {
     boolean mappedTypeFound = false;
     MappedTypes mappedTypes = typeHandler.getClass().getAnnotation(MappedTypes.class);
+    // 是否添加 MappedTypes注解
     if (mappedTypes != null) {
       for (Class<?> handledType : mappedTypes.value()) {
         register(handledType, typeHandler);
         mappedTypeFound = true;
       }
     }
-    // @since 3.1.0 - try to auto-discover the mapped type
+    // 在不加注解的情况下尝试自动发现映射类型
     if (!mappedTypeFound && typeHandler instanceof TypeReference) {
+
       try {
         TypeReference<T> typeReference = (TypeReference<T>) typeHandler;
         register(typeReference.getRawType(), typeHandler);
@@ -351,6 +353,7 @@ public final class TypeHandlerRegistry {
         // maybe users define the TypeReference with a different type and are not assignable, so just ignore it
       }
     }
+    // 既没有mappedTypes注解也没有自动发现 默认方法
     if (!mappedTypeFound) {
       register((Class<T>) null, typeHandler);
     }
@@ -364,10 +367,13 @@ public final class TypeHandlerRegistry {
 
   private <T> void register(Type javaType, TypeHandler<? extends T> typeHandler) {
     MappedJdbcTypes mappedJdbcTypes = typeHandler.getClass().getAnnotation(MappedJdbcTypes.class);
+    // 是否添加MappedJdbcTypes注解
     if (mappedJdbcTypes != null) {
+
       for (JdbcType handledJdbcType : mappedJdbcTypes.value()) {
         register(javaType, handledJdbcType, typeHandler);
       }
+      // jdbc NULL类型处理
       if (mappedJdbcTypes.includeNullJdbcType()) {
         register(javaType, null, typeHandler);
       }
@@ -388,15 +394,20 @@ public final class TypeHandlerRegistry {
     register((Type) type, jdbcType, handler);
   }
 
+  // 参数Java类型，jdbc类型，类型处理器
   private void register(Type javaType, JdbcType jdbcType, TypeHandler<?> handler) {
     if (javaType != null) {
       Map<JdbcType, TypeHandler<?>> map = typeHandlerMap.get(javaType);
+      // 初始化
       if (map == null || map == NULL_TYPE_HANDLER_MAP) {
         map = new HashMap<>();
       }
+      // 添加 jdbcType-> 类型控制器
       map.put(jdbcType, handler);
+      // 一个java类型对应多个jdbc控制器
       typeHandlerMap.put(javaType, map);
     }
+    // 保存再allTypeHandlersMap中
     allTypeHandlersMap.put(handler.getClass(), handler);
   }
 
@@ -409,13 +420,16 @@ public final class TypeHandlerRegistry {
   public void register(Class<?> typeHandlerClass) {
     boolean mappedTypeFound = false;
     MappedTypes mappedTypes = typeHandlerClass.getAnnotation(MappedTypes.class);
+    // 是否添加MappedTypes(标识java类型，可以添加多个)注解
     if (mappedTypes != null) {
       for (Class<?> javaTypeClass : mappedTypes.value()) {
         register(javaTypeClass, typeHandlerClass);
         mappedTypeFound = true;
       }
     }
+    // 未添加注解
     if (!mappedTypeFound) {
+      // 未添加注解直接获取对应实例
       register(getInstance(null, typeHandlerClass));
     }
   }
@@ -426,6 +440,7 @@ public final class TypeHandlerRegistry {
     register(Resources.classForName(javaTypeClassName), Resources.classForName(typeHandlerClassName));
   }
 
+  // java类型 类型处理器
   public void register(Class<?> javaTypeClass, Class<?> typeHandlerClass) {
     register(javaTypeClass, getInstance(javaTypeClass, typeHandlerClass));
   }
@@ -440,6 +455,7 @@ public final class TypeHandlerRegistry {
 
   @SuppressWarnings("unchecked")
   public <T> TypeHandler<T> getInstance(Class<?> javaTypeClass, Class<?> typeHandlerClass) {
+    // 区别在于使用带参数的还是不带参数的构造方法
     if (javaTypeClass != null) {
       try {
         Constructor<?> c = typeHandlerClass.getConstructor(Class.class);
@@ -465,6 +481,7 @@ public final class TypeHandlerRegistry {
     resolverUtil.find(new ResolverUtil.IsA(TypeHandler.class), packageName);
     Set<Class<? extends Class<?>>> handlerSet = resolverUtil.getClasses();
     for (Class<?> type : handlerSet) {
+      // 找出符合的类
       //Ignore inner classes and interfaces (including package-info.java) and abstract classes
       if (!type.isAnonymousClass() && !type.isInterface() && !Modifier.isAbstract(type.getModifiers())) {
         register(type);

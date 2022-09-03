@@ -51,49 +51,49 @@ import org.apache.ibatis.cache.impl.PerpetualCache;
 public @interface CacheNamespace {
 
   /**
-   * Returns the cache implementation type to use.
+   * 返回要使用的缓存实现类型.
    *
    * @return the cache implementation type
    */
   Class<? extends Cache> implementation() default PerpetualCache.class;
 
   /**
-   * Returns the cache evicting implementation type to use.
+   * 返回要使用的缓存驱逐实现类型
    *
    * @return the cache evicting implementation type
    */
   Class<? extends Cache> eviction() default LruCache.class;
 
   /**
-   * Returns the flush interval.
+   * 返回刷新间隔
    *
    * @return the flush interval
    */
   long flushInterval() default 0;
 
   /**
-   * Return the cache size.
+   * 返回缓存大小
    *
    * @return the cache size
    */
   int size() default 1024;
 
   /**
-   * Returns whether use read/write cache.
+   * 返回是否使用读/写缓存.
    *
    * @return {@code true} if use read/write cache; {@code false} if otherwise
    */
   boolean readWrite() default true;
 
   /**
-   * Returns whether block the cache at request time or not.
+   * 返回是否在请求时阻塞缓存
    *
    * @return {@code true} if block the cache; {@code false} if otherwise
    */
   boolean blocking() default false;
 
   /**
-   * Returns property values for a implementation object.
+   * 返回实现对象的属性值。
    *
    * @return property values
    * @since 3.4.2

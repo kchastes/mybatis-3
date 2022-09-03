@@ -112,20 +112,30 @@ public class MapperAnnotationBuilder {
     this.type = type;
   }
 
+  // 既会处理xml格式也会处理注解 先处理xml 没有在解析xml
   public void parse() {
     String resource = type.toString();
+    // 是否加载过
     if (!configuration.isResourceLoaded(resource)) {
+      // 加载类路径下的xml文件
       loadXmlResource();
+      // 添加至已加载列表
       configuration.addLoadedResource(resource);
       assistant.setCurrentNamespace(type.getName());
+      // 生成缓存配置对象
       parseCache();
+      // 配置缓存引用
       parseCacheRef();
       for (Method method : type.getMethods()) {
+        // 跳过桥接方法和默认方法
         if (!canHaveStatement(method)) {
           continue;
         }
+        // getAnnotationWrapper根据databaseId获取对应的注解方法,无则返回databaseId为空的注解方法 false没匹配是否报错
+        // 此处为true条件：存在Select注解和不存在ResultMap注解
         if (getAnnotationWrapper(method, false, Select.class, SelectProvider.class).isPresent()
             && method.getAnnotation(ResultMap.class) == null) {
+          // 处理返回结果
           parseResultMap(method);
         }
         try {
@@ -135,6 +145,7 @@ public class MapperAnnotationBuilder {
         }
       }
     }
+    // 重新解析原来失败的
     parsePendingMethods();
   }
 
@@ -163,17 +174,20 @@ public class MapperAnnotationBuilder {
     // to prevent loading again a resource twice
     // this flag is set at XMLMapperBuilder#bindMapperForNamespace
     if (!configuration.isResourceLoaded("namespace:" + type.getName())) {
+      // 加载同目录下的xml
       String xmlResource = type.getName().replace('.', '/') + ".xml";
       // #1347
       InputStream inputStream = type.getResourceAsStream("/" + xmlResource);
+      // 尝试加载类路径中的xml
       if (inputStream == null) {
-        // Search XML mapper that is not in the module but in the classpath.
+        // 搜索不在模块中但在类路径中的 XML 映射器
         try {
           inputStream = Resources.getResourceAsStream(type.getClassLoader(), xmlResource);
         } catch (IOException e2) {
           // ignore, resource is not required
         }
       }
+      // 找到则加载xml文件 没有则忽略
       if (inputStream != null) {
         XMLMapperBuilder xmlParser = new XMLMapperBuilder(inputStream, assistant.getConfiguration(), xmlResource, configuration.getSqlFragments(), type.getName());
         xmlParser.parse();
@@ -182,6 +196,7 @@ public class MapperAnnotationBuilder {
   }
 
   private void parseCache() {
+    // 是否添加CacheNamespace注解 是否为给定的命名空间（比如类）配置缓存
     CacheNamespace cacheDomain = type.getAnnotation(CacheNamespace.class);
     if (cacheDomain != null) {
       Integer size = cacheDomain.size() == 0 ? null : cacheDomain.size();
@@ -208,9 +223,11 @@ public class MapperAnnotationBuilder {
     if (cacheDomainRef != null) {
       Class<?> refType = cacheDomainRef.value();
       String refName = cacheDomainRef.name();
+      // value 和name必填一个不能是默认
       if (refType == void.class && refName.isEmpty()) {
         throw new BuilderException("Should be specified either value() or name() attribute in the @CacheNamespaceRef");
       }
+      // 不能同时配置两个
       if (refType != void.class && !refName.isEmpty()) {
         throw new BuilderException("Cannot use both value() and name() attribute in the @CacheNamespaceRef");
       }
@@ -409,6 +426,7 @@ public class MapperAnnotationBuilder {
 
   private Class<?> getReturnType(Method method) {
     Class<?> returnType = method.getReturnType();
+
     Type resolvedReturnType = TypeParameterResolver.resolveReturnType(method, type);
     if (resolvedReturnType instanceof Class) {
       returnType = (Class<?>) resolvedReturnType;
@@ -635,6 +653,7 @@ public class MapperAnnotationBuilder {
     return languageDriver.createSqlSource(configuration, String.join(" ", strings).trim(), parameterTypeClass);
   }
 
+  // 方法 false, Select.class, SelectProvider.class
   @SafeVarargs
   private final Optional<AnnotationWrapper> getAnnotationWrapper(Method method, boolean errorIfNoMatch,
       Class<? extends Annotation>... targetTypes) {
@@ -644,6 +663,7 @@ public class MapperAnnotationBuilder {
   private Optional<AnnotationWrapper> getAnnotationWrapper(Method method, boolean errorIfNoMatch,
       Collection<Class<? extends Annotation>> targetTypes) {
     String databaseId = configuration.getDatabaseId();
+    // 获取指定注解的方法 根据databaseId分组
     Map<String, AnnotationWrapper> statementAnnotations = targetTypes.stream()
         .flatMap(x -> Arrays.stream(method.getAnnotationsByType(x))).map(AnnotationWrapper::new)
         .collect(Collectors.toMap(AnnotationWrapper::getDatabaseId, x -> x, (existing, duplicate) -> {
@@ -651,6 +671,7 @@ public class MapperAnnotationBuilder {
               existing.getAnnotation(), duplicate.getAnnotation(),
               method.getDeclaringClass().getName() + "." + method.getName()));
         }));
+    // 根据databaseId获取注解包装，没有则获取空的
     AnnotationWrapper annotationWrapper = null;
     if (databaseId != null) {
       annotationWrapper = statementAnnotations.get(databaseId);
@@ -659,7 +680,7 @@ public class MapperAnnotationBuilder {
       annotationWrapper = statementAnnotations.get("");
     }
     if (errorIfNoMatch && annotationWrapper == null && !statementAnnotations.isEmpty()) {
-      // Annotations exist, but there is no matching one for the specified databaseId
+      // 注解存在，但指定的 databaseId 没有匹配的注解
       throw new BuilderException(
           String.format(
               "Could not find a statement annotation that correspond a current database or default statement on method '%s.%s'. Current database id is [%s].",

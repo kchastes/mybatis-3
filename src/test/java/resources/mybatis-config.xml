@@ -6,9 +6,9 @@
 
   <properties>
       <property name="driver" value="com.mysql.cj.jdbc.Driver"/>
-      <property name="url" value="jdbc:mysql://******/mybatis"/>
-      <property name="username" value="****"/>
-      <property name="password" value="****"/>
+      <property name="url" value="jdbc:mysql://42.193.130.94:3305/mybatis"/>
+      <property name="username" value="root"/>
+      <property name="password" value="fk3210.0"/>
   </properties>
 
   <settings>
@@ -33,8 +33,9 @@
   </environments>
 
   <mappers>
-    <mapper resource="org/apache/self/dao/StudentMapper.xml"/>
-    <mapper resource="org/apache/self/dao/ClassRoomMapper.xml"/>
+    <!--<mapper resource="org/apache/self/dao/StudentMapper.xml"/>
+    <mapper resource="org/apache/self/dao/ClassRoomMapper.xml"/>-->
+    <package name="org.apache.self.dao"/>
   </mappers>
 
 </configuration>

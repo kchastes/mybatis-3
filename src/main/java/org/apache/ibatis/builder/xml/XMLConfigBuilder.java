@@ -130,8 +130,11 @@ public class XMLConfigBuilder extends BaseBuilder {
       // read it after objectFactory and objectWrapperFactory issue #631
       // 环境配置
       environmentsElement(root.evalNode("environments"));
+      // 构建数据库厂商标识
       databaseIdProviderElement(root.evalNode("databaseIdProvider"));
+      // 类型处理器
       typeHandlerElement(root.evalNode("typeHandlers"));
+      // 关键 mapper文件配置
       mapperElement(root.evalNode("mappers"));
     } catch (Exception e) {
       throw new BuilderException("Error parsing SQL Mapper Configuration. Cause: " + e, e);
@@ -321,8 +324,8 @@ public class XMLConfigBuilder extends BaseBuilder {
           TransactionFactory txFactory = transactionManagerElement(child.evalNode("transactionManager"));
           // 加载数据源配置
           DataSourceFactory dsFactory = dataSourceElement(child.evalNode("dataSource"));
-
           DataSource dataSource = dsFactory.getDataSource();
+          // 构建环境配置
           Environment.Builder environmentBuilder = new Environment.Builder(id)
               .transactionFactory(txFactory)
               .dataSource(dataSource);
@@ -354,6 +357,10 @@ public class XMLConfigBuilder extends BaseBuilder {
 
   private TransactionFactory transactionManagerElement(XNode context) throws Exception {
     if (context != null) {
+      // 在 MyBatis 中有两种类型的事务管理器JDBC|MANAGED
+      // jdbc直接使用了 JDBC 的提交和回滚功能，它依赖从数据源获得的连接来管理事务作用域
+      // MANAGED – 这个配置几乎没做什么。它从不提交或回滚一个连接，而是让容器来管理事务的整个生命周期（比如 JEE 应用服务器的上下文）
+      // 如果你正在使用 Spring + MyBatis，则没有必要配置事务管理器，因为 Spring 模块会使用自带的管理器来覆盖前面的配置。
       String type = context.getStringAttribute("type");
       Properties props = context.getChildrenAsProperties();
       TransactionFactory factory = (TransactionFactory) resolveClass(type).getDeclaredConstructor().newInstance();
@@ -363,6 +370,9 @@ public class XMLConfigBuilder extends BaseBuilder {
     throw new BuilderException("Environment declaration requires a TransactionFactory.");
   }
 
+  // 数据源配置 UNPOOLED– 这个数据源的实现会每次请求时打开和关闭连接
+  // POOLED– 这种数据源的实现利用“池”的概念将 JDBC 连接对象组织起来，
+  // NDI – 这个数据源实现是为了能在如 EJB 或应用服务器这类容器中使用
   private DataSourceFactory dataSourceElement(XNode context) throws Exception {
     if (context != null) {
       String type = context.getStringAttribute("type");
@@ -377,10 +387,12 @@ public class XMLConfigBuilder extends BaseBuilder {
   private void typeHandlerElement(XNode parent) {
     if (parent != null) {
       for (XNode child : parent.getChildren()) {
+        // 支持包扫描
         if ("package".equals(child.getName())) {
           String typeHandlerPackage = child.getStringAttribute("name");
           typeHandlerRegistry.register(typeHandlerPackage);
         } else {
+          // 处理单个
           String javaTypeName = child.getStringAttribute("javaType");
           String jdbcTypeName = child.getStringAttribute("jdbcType");
           String handlerTypeName = child.getStringAttribute("handler");
@@ -400,14 +412,16 @@ public class XMLConfigBuilder extends BaseBuilder {
       }
     }
   }
-
+  // 解析mapper文件 每个接口包装成MapperProxyFactory类型
   private void mapperElement(XNode parent) throws Exception {
     if (parent != null) {
       for (XNode child : parent.getChildren()) {
+        // 包扫描会处理注解也会处理xml 先处理xml
         if ("package".equals(child.getName())) {
           String mapperPackage = child.getStringAttribute("name");
           configuration.addMappers(mapperPackage);
         } else {
+          // resource url class只能配置一个
           String resource = child.getStringAttribute("resource");
           String url = child.getStringAttribute("url");
           String mapperClass = child.getStringAttribute("class");

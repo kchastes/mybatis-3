@@ -22,7 +22,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * The annotation that specify java types to map {@link TypeHandler}.
+ * 指定 java 类型以映射TypeHandler的注释。
  *
  * <p>
  * <b>How to use:</b>

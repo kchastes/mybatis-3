@@ -22,7 +22,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * The annotation that specify jdbc types to map {@link TypeHandler}.
+ * 指定 jdbc 类型以映射TypeHandler的注释。
  *
  * <p>
  * <b>How to use:</b>
