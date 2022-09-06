@@ -135,7 +135,7 @@ public class MapperAnnotationBuilder {
         // 此处为true条件：存在Select注解和不存在ResultMap注解
         if (getAnnotationWrapper(method, false, Select.class, SelectProvider.class).isPresent()
             && method.getAnnotation(ResultMap.class) == null) {
-          // 处理返回结果
+          // 处理resultMap
           parseResultMap(method);
         }
         try {
