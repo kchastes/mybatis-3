@@ -6,9 +6,9 @@
 
   <properties>
       <property name="driver" value="com.mysql.cj.jdbc.Driver"/>
-      <property name="url" value="jdbc:mysql://42.193.130.94:3305/mybatis"/>
-      <property name="username" value="root"/>
-      <property name="password" value="fk3210.0"/>
+      <property name="url" value="jdbc:mysql://****/mybatis"/>
+      <property name="username" value="**"/>
+      <property name="password" value="***"/>
   </properties>
 
   <settings>
