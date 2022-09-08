@@ -39,7 +39,6 @@ public class MetaClass {
     this.reflector = reflectorFactory.findForClass(type);
   }
 
-  // configuration.class
   public static MetaClass forClass(Class<?> type, ReflectorFactory reflectorFactory) {
     return new MetaClass(type, reflectorFactory);
   }

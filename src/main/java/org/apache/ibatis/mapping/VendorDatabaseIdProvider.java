@@ -34,6 +34,8 @@ import org.apache.ibatis.logging.LogFactory;
  * key="Microsoft SQL Server", value="ms" will return "ms".
  * It can return null, if no database product name or
  * a properties was specified and no translation was found.
+ * 应商 DatabaseId 提供者。它以 databaseId 形式返回数据库产品名称。如果用户提供了一个属性，
+ * 它使用它来翻译数据库产品名称 key="Microsoft SQL Server"，value="ms" 将返回 "ms"。如果未指定数据库产品名称或属性且未找到翻译，则它可以返回 null。
  *
  * @author Eduardo Macarron
  */

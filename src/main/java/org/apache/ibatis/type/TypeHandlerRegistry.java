@@ -419,6 +419,7 @@ public final class TypeHandlerRegistry {
 
   public void register(Class<?> typeHandlerClass) {
     boolean mappedTypeFound = false;
+    // 获取类上的java类型注解
     MappedTypes mappedTypes = typeHandlerClass.getAnnotation(MappedTypes.class);
     // 是否添加MappedTypes(标识java类型，可以添加多个)注解
     if (mappedTypes != null) {

@@ -82,14 +82,20 @@ public class XMLConfigBuilder extends BaseBuilder {
     this(inputStream, environment, null);
   }
 
-  // 初次 xml null null
+  /**
+   *
+   * @param inputStream 配置文件流
+   * @param environment 环境标识字符串
+   * @param props 外部化配置参数
+   */
   public XMLConfigBuilder(InputStream inputStream, String environment, Properties props) {
-    // 构建xml解析器
+    // 构建xml解析器   new XMLMapperEntityResolver()就是将需要远程下载的dtd文件转为本地可用
     this(new XPathParser(inputStream, true, props, new XMLMapperEntityResolver()), environment, props);
   }
 
   private XMLConfigBuilder(XPathParser parser, String environment, Properties props) {
     super(new Configuration());
+    //
     ErrorContext.instance().resource("SQL Mapper Configuration");
     this.configuration.setVariables(props);
     this.parsed = false;
@@ -110,7 +116,7 @@ public class XMLConfigBuilder extends BaseBuilder {
     try {
       // resource和url不能同时配置，优先级：形参(SqlSessionFactoryBuilder.builder())，外部，标签内 , 同时保存在XParse内
       propertiesElement(root.evalNode("properties"));
-      // 获取setting配置值,通过发射获取set方法以判断是否存在该属性值
+      // 获取setting配置值,通过反射获取set方法以判断是否存在该属性值
       Properties settings = settingsAsProperties(root.evalNode("settings"));
       loadCustomVfs(settings);
       // 设置日志实现 todo 后续研究日志模块
@@ -123,7 +129,7 @@ public class XMLConfigBuilder extends BaseBuilder {
       objectFactoryElement(root.evalNode("objectFactory"));
       // 对象包装工厂
       objectWrapperFactoryElement(root.evalNode("objectWrapperFactory"));
-      // 发射工厂
+      // 反射工厂
       reflectorFactoryElement(root.evalNode("reflectorFactory"));
       // 通过setting中的元素改变configuration中的默认值
       settingsElement(settings);
@@ -372,7 +378,7 @@ public class XMLConfigBuilder extends BaseBuilder {
 
   // 数据源配置 UNPOOLED– 这个数据源的实现会每次请求时打开和关闭连接
   // POOLED– 这种数据源的实现利用“池”的概念将 JDBC 连接对象组织起来，
-  // NDI – 这个数据源实现是为了能在如 EJB 或应用服务器这类容器中使用
+  // JNDI – 这个数据源实现是为了能在如 EJB 或应用服务器这类容器中使用
   private DataSourceFactory dataSourceElement(XNode context) throws Exception {
     if (context != null) {
       String type = context.getStringAttribute("type");

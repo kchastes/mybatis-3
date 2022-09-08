@@ -48,6 +48,7 @@ import org.apache.ibatis.util.MapUtil;
 /**
  * This class represents a cached set of class definition information that
  * allows for easy mapping between property names and getter/setter methods.
+ * 此类表示一组缓存的类定义信息，允许在属性名称和 getter/setter 方法之间轻松映射。
  *
  * @author Clinton Begin
  */
@@ -281,7 +282,7 @@ public class Reflector {
    * declared in this class and any superclass.
    * We use this method, instead of the simpler <code>Class.getMethods()</code>,
    * because we want to look for private methods as well.
-   *
+   *此方法返回一个数组，其中包含在此类和任何超类中声明的所有方法。我们使用这个方法，而不是更简单的Class.getMethods() ，因为我们也想寻找私有方法
    * @param clazz The class
    * @return An array containing all methods in this class
    */
