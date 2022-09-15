@@ -19,11 +19,18 @@ import java.util.Iterator;
 
 /**
  * @author Clinton Begin
+ * 属性标记器。传入一个形如“student[sId].name”的字符串后，该标记器会将其拆分开，放入各个属性中
+ *
  */
 public class PropertyTokenizer implements Iterator<PropertyTokenizer> {
+  // 如果是student[sid].name 则以下属性分别是：
+  // student
   private String name;
+  // student[sid]
   private final String indexedName;
+  // sid
   private String index;
+  // name
   private final String children;
 
   public PropertyTokenizer(String fullname) {

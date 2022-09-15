@@ -43,6 +43,7 @@ public class GetFieldInvoker implements Invoker {
     }
   }
 
+  // 获取目标属性类型
   @Override
   public Class<?> getType() {
     return field.getType();

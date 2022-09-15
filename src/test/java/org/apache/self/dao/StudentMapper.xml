@@ -5,7 +5,6 @@
 
 <mapper namespace="org.apache.self.dao.StudentMapper">
 
-  <!-- todo flushCache测试-->
 
   <select id="selectStudentById" resultType="Student">
     select *

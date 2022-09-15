@@ -353,7 +353,7 @@ public final class TypeHandlerRegistry {
         // maybe users define the TypeReference with a different type and are not assignable, so just ignore it
       }
     }
-    // 既没有mappedTypes注解也没有自动发现 默认方法
+    // 既没有mappedTypes注解 也没有继承TypeReference类 自动发现 默认方法
     if (!mappedTypeFound) {
       register((Class<T>) null, typeHandler);
     }
@@ -404,7 +404,8 @@ public final class TypeHandlerRegistry {
       }
       // 添加 jdbcType-> 类型控制器
       map.put(jdbcType, handler);
-      // 一个java类型对应多个jdbc控制器
+      // 一个java类型对应多个jdbc控制器  String: varchar->handler
+                                    //       int -> handler
       typeHandlerMap.put(javaType, map);
     }
     // 保存再allTypeHandlersMap中
@@ -428,7 +429,7 @@ public final class TypeHandlerRegistry {
         mappedTypeFound = true;
       }
     }
-    // 未添加注解
+    // 如果只是实现了TypeHandler接口则只会在allTypeHandlersMap中添加，key为class
     if (!mappedTypeFound) {
       // 未添加注解直接获取对应实例
       register(getInstance(null, typeHandlerClass));

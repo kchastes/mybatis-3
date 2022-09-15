@@ -20,6 +20,8 @@ import java.lang.reflect.Field;
 import org.apache.ibatis.reflection.Reflector;
 
 /**
+ * 属性复制器
+ * 可以方便地将一个对象的属性复制到另一个对象中
  * @author Clinton Begin
  */
 public final class PropertyCopier {
@@ -28,6 +30,7 @@ public final class PropertyCopier {
     // Prevent Instantiation of Static Class
   }
 
+  // 将sourceBean的属性复制给destBean 该属性复制器无法完成继承得来的属性的复制
   public static void copyBeanProperties(Class<?> type, Object sourceBean, Object destinationBean) {
     Class<?> parent = type;
     while (parent != null) {

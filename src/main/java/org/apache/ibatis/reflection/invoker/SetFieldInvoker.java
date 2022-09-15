@@ -44,6 +44,7 @@ public class SetFieldInvoker implements Invoker {
     return null;
   }
 
+  // 获取目标属性类型
   @Override
   public Class<?> getType() {
     return field.getType();

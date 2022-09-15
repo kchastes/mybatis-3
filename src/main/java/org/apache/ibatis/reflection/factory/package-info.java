@@ -14,6 +14,6 @@
  *    limitations under the License.
  */
 /**
- * Object factory.
+ * Object factory. 对象创建工厂
  */
 package org.apache.ibatis.reflection.factory;

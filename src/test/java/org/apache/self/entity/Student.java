@@ -1,5 +1,7 @@
 package org.apache.self.entity;
 
+import org.apache.ibatis.annotations.Param;
+
 import java.time.LocalDateTime;
 
 public class Student {
@@ -10,6 +12,15 @@ public class Student {
   private LocalDateTime birthday;
   private Integer classId;
   private ClassRoom classRoom;
+
+  public Student() {
+  }
+
+  public Student(Integer id,String userName, Integer age) {
+    this.id = id;
+    this.userName = userName;
+    this.age = age;
+  }
 
   public Integer getId() {
     return id;

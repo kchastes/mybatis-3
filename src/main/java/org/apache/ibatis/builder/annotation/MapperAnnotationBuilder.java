@@ -106,6 +106,7 @@ public class MapperAnnotationBuilder {
   private final Class<?> type;
 
   public MapperAnnotationBuilder(Configuration configuration, Class<?> type) {
+    // com/xxx/xxx.java (best guess)
     String resource = type.getName().replace('.', '/') + ".java (best guess)";
     this.assistant = new MapperBuilderAssistant(configuration, resource);
     this.configuration = configuration;
@@ -114,14 +115,16 @@ public class MapperAnnotationBuilder {
 
   // 既会处理xml格式也会处理注解 先处理xml 没有在解析xml
   public void parse() {
+    // interface xxx.xxx.xxx
     String resource = type.toString();
     // 是否加载过
     if (!configuration.isResourceLoaded(resource)) {
-      // 加载类路径下的xml文件
+      // 尝试加载类路径下的xml文件
       loadXmlResource();
       // 添加至已加载列表
       configuration.addLoadedResource(resource);
       assistant.setCurrentNamespace(type.getName());
+      // 以下方法对接口注解进行处理
       // 生成缓存配置对象
       parseCache();
       // 配置缓存引用
@@ -131,11 +134,11 @@ public class MapperAnnotationBuilder {
         if (!canHaveStatement(method)) {
           continue;
         }
-        // getAnnotationWrapper根据databaseId获取对应的注解方法,无则返回databaseId为空的注解方法 false没匹配是否报错
-        // 此处为true条件：存在Select注解和不存在ResultMap注解
+        // getAnnotationWrapper根据databaseId获取对应的注解方法,无则返回databaseId为空的对应注解方法 false没匹配是否报错
+        // 此处为true条件：存在Select,SelectProvider注解和不存在ResultMap注解
         if (getAnnotationWrapper(method, false, Select.class, SelectProvider.class).isPresent()
             && method.getAnnotation(ResultMap.class) == null) {
-          // 处理resultMap
+          // 处理注解Results
           parseResultMap(method);
         }
         try {
@@ -173,8 +176,10 @@ public class MapperAnnotationBuilder {
     // Spring may not know the real resource name so we check a flag
     // to prevent loading again a resource twice
     // this flag is set at XMLMapperBuilder#bindMapperForNamespace
+    // namespace:java.lang.String 留个悬念，可能通过spring加载过了
     if (!configuration.isResourceLoaded("namespace:" + type.getName())) {
       // 加载同目录下的xml
+      // java/lang/String.xml
       String xmlResource = type.getName().replace('.', '/') + ".xml";
       // #1347
       InputStream inputStream = type.getResourceAsStream("/" + xmlResource);
@@ -241,6 +246,7 @@ public class MapperAnnotationBuilder {
   }
 
   private String parseResultMap(Method method) {
+    // 取具体方法返回类型，普通，数组map之类的
     Class<?> returnType = getReturnType(method);
     Arg[] args = method.getAnnotationsByType(Arg.class);
     Result[] results = method.getAnnotationsByType(Result.class);
@@ -412,6 +418,7 @@ public class MapperAnnotationBuilder {
     Class<?> parameterType = null;
     Class<?>[] parameterTypes = method.getParameterTypes();
     for (Class<?> currentParameterType : parameterTypes) {
+      // 排除RowBounds和ResultHandler类型
       if (!RowBounds.class.isAssignableFrom(currentParameterType) && !ResultHandler.class.isAssignableFrom(currentParameterType)) {
         if (parameterType == null) {
           parameterType = currentParameterType;

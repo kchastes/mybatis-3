@@ -90,13 +90,16 @@ public class XMLMapperBuilder extends BaseBuilder {
     this.resource = resource;
   }
 
+  // 包扫描或者指定了xml文件位置加载处理xml文件
   public void parse() {
+    // java/lang/String.xml
     if (!configuration.isResourceLoaded(resource)) {
       configurationElement(parser.evalNode("/mapper"));
       configuration.addLoadedResource(resource);
+      // todo spring
       bindMapperForNamespace();
     }
-
+    // 以下三个方法都是在封装对应类型时出现异常，在此处从新加载
     parsePendingResultMaps();
     parsePendingCacheRefs();
     parsePendingStatements();
@@ -106,6 +109,7 @@ public class XMLMapperBuilder extends BaseBuilder {
     return sqlFragments.get(refid);
   }
 
+  // 解析mapper文件
   private void configurationElement(XNode context) {
     try {
       // namespace必填
@@ -114,15 +118,20 @@ public class XMLMapperBuilder extends BaseBuilder {
         throw new BuilderException("Mapper's namespace cannot be empty");
       }
       builderAssistant.setCurrentNamespace(namespace);
+      // 先配置缓存引用的原因是防止同时配置两个缓存标签
       // 配置缓存引用
       cacheRefElement(context.evalNode("cache-ref"));
       // 配置缓存
       cacheElement(context.evalNode("cache"));
       // 配置parameterMap 已废弃 不再研究 老式风格的参数映射。此元素已被废弃，并可能在将来被移除！请使用行内参数映射。文档中不会介绍此元素。
       parameterMapElement(context.evalNodes("/mapper/parameterMap"));
-      // 结果映射
+
+      // 解析resultMap标签 子项为resultMapping,最终转为resultMap对象
+      // resultMap中的每一个标签都是resultMapping
       resultMapElements(context.evalNodes("/mapper/resultMap"));
+      // 组装sql片段
       sqlElement(context.evalNodes("/mapper/sql"));
+      // 解析sql标签
       buildStatementFromContext(context.evalNodes("select|insert|update|delete"));
     } catch (Exception e) {
       throw new BuilderException("Error parsing Mapper XML. The XML location is '" + resource + "'. Cause: " + e, e);
@@ -275,12 +284,16 @@ public class XMLMapperBuilder extends BaseBuilder {
     Discriminator discriminator = null;
     List<ResultMapping> resultMappings = new ArrayList<>(additionalResultMappings);
     List<XNode> resultChildren = resultMapNode.getChildren();
+    // 根据resultMap配置生成resultMapping
     for (XNode resultChild : resultChildren) {
+      // 解析constructor标签
       if ("constructor".equals(resultChild.getName())) {
         processConstructorElement(resultChild, typeClass, resultMappings);
       } else if ("discriminator".equals(resultChild.getName())) {
+        //解析discriminator标签
         discriminator = processDiscriminatorElement(resultChild, typeClass, resultMappings);
       } else {
+        // 解析普通标签
         List<ResultFlag> flags = new ArrayList<>();
         if ("id".equals(resultChild.getName())) {
           flags.add(ResultFlag.ID);
@@ -288,10 +301,12 @@ public class XMLMapperBuilder extends BaseBuilder {
         resultMappings.add(buildResultMappingFromContext(resultChild, typeClass, flags));
       }
     }
+    // 处理resultMap属性
     String id = resultMapNode.getStringAttribute("id",
             resultMapNode.getValueBasedIdentifier());
     String extend = resultMapNode.getStringAttribute("extends");
     Boolean autoMapping = resultMapNode.getBooleanAttribute("autoMapping");
+
     ResultMapResolver resultMapResolver = new ResultMapResolver(builderAssistant, id, typeClass, extend, discriminator, resultMappings, autoMapping);
     try {
       return resultMapResolver.resolve();
@@ -302,6 +317,7 @@ public class XMLMapperBuilder extends BaseBuilder {
   }
 
   protected Class<?> inheritEnclosingType(XNode resultMapNode, Class<?> enclosingType) {
+    // association标签中没有resultMap属性
     if ("association".equals(resultMapNode.getName()) && resultMapNode.getStringAttribute("resultMap") == null) {
       String property = resultMapNode.getStringAttribute("property");
       if (property != null && enclosingType != null) {
@@ -345,6 +361,7 @@ public class XMLMapperBuilder extends BaseBuilder {
 
   private void sqlElement(List<XNode> list) {
     if (configuration.getDatabaseId() != null) {
+      // 先获取对应数据库的sql段
       sqlElement(list, configuration.getDatabaseId());
     }
     sqlElement(list, null);
@@ -379,14 +396,17 @@ public class XMLMapperBuilder extends BaseBuilder {
   private ResultMapping buildResultMappingFromContext(XNode context, Class<?> resultType, List<ResultFlag> flags) {
     String property;
     if (flags.contains(ResultFlag.CONSTRUCTOR)) {
+      // 构造器内的使用name属性
       property = context.getStringAttribute("name");
     } else {
+      // 其他的使用properties
       property = context.getStringAttribute("property");
     }
     String column = context.getStringAttribute("column");
     String javaType = context.getStringAttribute("javaType");
     String jdbcType = context.getStringAttribute("jdbcType");
     String nestedSelect = context.getStringAttribute("select");
+    // 嵌套resultMap
     String nestedResultMap = context.getStringAttribute("resultMap", () ->
         processNestedResultMappings(context, Collections.emptyList(), resultType));
     String notNullColumn = context.getStringAttribute("notNullColumn");

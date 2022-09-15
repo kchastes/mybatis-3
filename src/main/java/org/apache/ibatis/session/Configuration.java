@@ -707,9 +707,11 @@ public class Configuration {
     } else {
       executor = new SimpleExecutor(this, transaction);
     }
+    // 默认装饰CachingExecutor
     if (cacheEnabled) {
       executor = new CachingExecutor(executor);
     }
+    // 生成插件拦截动态代理对象，多个该接口的插件会生成代理的代理
     executor = (Executor) interceptorChain.pluginAll(executor);
     return executor;
   }
@@ -847,6 +849,7 @@ public class Configuration {
   }
 
   public MappedStatement getMappedStatement(String id, boolean validateIncompleteStatements) {
+    // 将解析标签中出现异常的缓存对象在进行处理
     if (validateIncompleteStatements) {
       buildAllStatements();
     }

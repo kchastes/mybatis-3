@@ -28,10 +28,23 @@ import org.apache.ibatis.reflection.property.PropertyTokenizer;
 
 /**
  * @author Clinton Begin
+ *  get：获得被包装对象某个属性的值；
+ * · set：设置被包装对象某个属性的值；
+ * · findProperty：找到对应的属性名称；
+ * · getGetterNames：获得所有的属性 get方法名称；
+ * · getSetterNames：获得所有的属性 set方法名称；
+ * · getSetterType：获得指定属性的 set方法的类型；
+ * · getGetterType：获得指定属性的 get方法的类型；
+ * · hasSetter：判断某个属性是否有对应的 set方法；
+ * · hasGetter：判断某个属性是否有对应的 get方法；
+ * · instantiatePropertyValue：实例化某个属性的值。
+ * 因此，一个 Bean经过 BeanWrapper封装后，就可以暴露出大量的易用方法，从而可以简单地实现对其属性、方法的操作
  */
 public class BeanWrapper extends BaseWrapper {
 
+  // 被包装的对象
   private final Object object;
+  // 被包装对象的元类信息
   private final MetaClass metaClass;
 
   public BeanWrapper(MetaObject metaObject, Object object) {

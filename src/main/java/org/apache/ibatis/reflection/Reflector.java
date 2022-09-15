@@ -49,36 +49,55 @@ import org.apache.ibatis.util.MapUtil;
  * This class represents a cached set of class definition information that
  * allows for easy mapping between property names and getter/setter methods.
  * 此类表示一组缓存的类定义信息，允许在属性名称和 getter/setter 方法之间轻松映射。
- *
+ * Reflector 类负责对一个类进行反射解析，并将解析后的结果在属性中存储起来
  * @author Clinton Begin
  */
 public class Reflector {
 
   private static final MethodHandle isRecordMethodHandle = getIsRecordMethodHandle();
+  // 要被反射解析的类
   private final Class<?> type;
+  // 有get方法的属性列表
   private final String[] readablePropertyNames;
+  // 有set方法的属性列表
   private final String[] writablePropertyNames;
+  // set方法映射表，key属性名，值为对应set方法
   private final Map<String, Invoker> setMethods = new HashMap<>();
+  // get方法映射表，key属性名，值为对应get方法
   private final Map<String, Invoker> getMethods = new HashMap<>();
+  // set方法输入类型 key属性名 值为set方法的第一个参数类型
   private final Map<String, Class<?>> setTypes = new HashMap<>();
+  // get方法输入类型 key属性名 值为get方法的返回值类型
   private final Map<String, Class<?>> getTypes = new HashMap<>();
+  // 默认的构造函数
   private Constructor<?> defaultConstructor;
-
+  // 大小写无关的属性映射表，key为属性名全大写，值为属性名
   private Map<String, String> caseInsensitivePropertyMap = new HashMap<>();
 
+  // 触发解析一个类
   public Reflector(Class<?> clazz) {
+    // 要被反射的类
     type = clazz;
+    // 设置默认构造器属性
     addDefaultConstructor(clazz);
+
     Method[] classMethods = getClassMethods(clazz);
+    // record特性兼容
     if (isRecord(type)) {
       addRecordGetMethods(classMethods);
     } else {
+      // 解析所有get
       addGetMethods(classMethods);
+      // 解析所有set
       addSetMethods(classMethods);
+      // 解析所有属性
       addFields(clazz);
     }
+    // 设置可读属性
     readablePropertyNames = getMethods.keySet().toArray(new String[0]);
+    // 设置可写属性
     writablePropertyNames = setMethods.keySet().toArray(new String[0]);
+    // 填充大小写无关映射
     for (String propName : readablePropertyNames) {
       caseInsensitivePropertyMap.put(propName.toUpperCase(Locale.ENGLISH), propName);
     }

@@ -91,9 +91,13 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
     Transaction tx = null;
     try {
       final Environment environment = configuration.getEnvironment();
+      // 默认使用ManagedTransactionFactory，如果配置了JDBC则使用 JdbcTransactionFactory
       final TransactionFactory transactionFactory = getTransactionFactoryFromEnvironment(environment);
+      // 也就是此处使用的是JdbcTransaction
       tx = transactionFactory.newTransaction(environment.getDataSource(), level, autoCommit);
+      // 此处executor默认用CachingExecutor装饰，如果还有executor插件的话，会变成动态代理对象
       final Executor executor = configuration.newExecutor(tx, execType);
+      // 最终由SqlSession聚合configuration和executor
       return new DefaultSqlSession(configuration, executor, autoCommit);
     } catch (Exception e) {
       closeTransaction(tx); // may have fetched a connection so lets call close()

@@ -83,6 +83,7 @@ public class MapperBuilderAssistant extends BaseBuilder {
     this.currentNamespace = currentNamespace;
   }
 
+  // 这个方法用去区分命名空间中的标签
   public String applyCurrentNamespace(String base, boolean isReference) {
     if (base == null) {
       return null;

@@ -12,6 +12,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
@@ -21,6 +22,10 @@ import java.util.Objects;
 public class MyBatisTestApplication {
 
   private SqlSession sqlSession;
+
+  public static void main(String[] args) {
+    System.out.println(BigDecimal.valueOf(23).compareTo(BigDecimal.ZERO));
+  }
 
   @Before
   public void init() throws IOException {

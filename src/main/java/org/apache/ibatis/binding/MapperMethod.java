@@ -73,6 +73,7 @@ public class MapperMethod {
         break;
       }
       case SELECT:
+        // 各种返回值判断
         if (method.returnsVoid() && method.hasResultHandler()) {
           executeWithResultHandler(sqlSession, args);
           result = null;
@@ -227,6 +228,7 @@ public class MapperMethod {
       MappedStatement ms = resolveMappedStatement(mapperInterface, methodName, declaringClass,
           configuration);
       if (ms == null) {
+        // 没有找到statement 判断方法是否是flush方法
         if (method.getAnnotation(Flush.class) != null) {
           name = null;
           type = SqlCommandType.FLUSH;

@@ -5,5 +5,4 @@
 
 <mapper namespace="org.apache.self.dao.ClassRoomMapper">
 
-
 </mapper>

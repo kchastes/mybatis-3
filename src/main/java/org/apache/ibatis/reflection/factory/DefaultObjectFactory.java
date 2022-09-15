@@ -55,6 +55,7 @@ public class DefaultObjectFactory implements ObjectFactory, Serializable {
 
   private  <T> T instantiateClass(Class<T> type, List<Class<?>> constructorArgTypes, List<Object> constructorArgs) {
     try {
+      // 默认构造参数
       Constructor<T> constructor;
       if (constructorArgTypes == null || constructorArgs == null) {
         constructor = type.getDeclaredConstructor();
@@ -69,6 +70,7 @@ public class DefaultObjectFactory implements ObjectFactory, Serializable {
           }
         }
       }
+      // 根据参数查找对应构造函数
       constructor = type.getDeclaredConstructor(constructorArgTypes.toArray(new Class[0]));
       try {
         return constructor.newInstance(constructorArgs.toArray(new Object[0]));
@@ -89,6 +91,7 @@ public class DefaultObjectFactory implements ObjectFactory, Serializable {
     }
   }
 
+  // 如果传入的是接口类型，自动选择一个实现类
   protected Class<?> resolveInterface(Class<?> type) {
     Class<?> classToCreate;
     if (type == List.class || type == Collection.class || type == Iterable.class) {

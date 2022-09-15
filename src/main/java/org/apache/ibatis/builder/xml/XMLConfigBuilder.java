@@ -123,7 +123,7 @@ public class XMLConfigBuilder extends BaseBuilder {
       loadCustomLogImpl(settings);
       // 别名注册
       typeAliasesElement(root.evalNode("typeAliases"));
-      // 插件注册至拦截器链
+      // 插件注册至拦截器链 必须有@Intercepts注解
       pluginElement(root.evalNode("plugins"));
       // 注册对象工厂 每次 MyBatis 创建结果对象的新实例时，它都会使用一个对象工厂（ObjectFactory）实例来完成实例化工作
       objectFactoryElement(root.evalNode("objectFactory"));

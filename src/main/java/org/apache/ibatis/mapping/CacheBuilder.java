@@ -90,17 +90,22 @@ public class CacheBuilder {
   }
 
   public Cache build() {
+    // 处理默认情况
     setDefaultImplementations();
     Cache cache = newBaseCacheInstance(implementation, id);
     setCacheProperties(cache);
-    // issue #352, do not apply decorators to custom caches
+    // 不要将装饰器应用于自定义缓存 也就是说自定义缓存并不会使用装饰器
     if (PerpetualCache.class.equals(cache.getClass())) {
+      // 循环装饰
       for (Class<? extends Cache> decorator : decorators) {
         cache = newCacheDecoratorInstance(decorator, cache);
         setCacheProperties(cache);
       }
+      // 设置标准装饰器 根据设置的属性添加对应的缓存装饰器
+      // 什么都没加 则结构默认顺序为 SynchronizedCache  LoggingCache LruCache
       cache = setStandardDecorators(cache);
     } else if (!LoggingCache.class.isAssignableFrom(cache.getClass())) {
+      // 如果不是LoggingCache型的，只会会应用日志装饰器
       cache = new LoggingCache(cache);
     }
     return cache;

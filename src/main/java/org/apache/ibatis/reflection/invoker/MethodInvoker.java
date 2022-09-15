@@ -32,8 +32,10 @@ public class MethodInvoker implements Invoker {
     this.method = method;
 
     if (method.getParameterTypes().length == 1) {
+      // 有且只有一个参数时，返回参数类型
       type = method.getParameterTypes()[0];
     } else {
+      // 返回方法返回类型
       type = method.getReturnType();
     }
   }

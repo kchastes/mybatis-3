@@ -52,7 +52,7 @@ public class XMLIncludeTransformer {
 
   /**
    * Recursively apply includes through all SQL fragments.
-   *
+   *通过所有 SQL 片段递归应用包含
    * @param source
    *          Include node in DOM tree
    * @param variablesContext

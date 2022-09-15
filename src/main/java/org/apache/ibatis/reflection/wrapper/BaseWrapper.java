@@ -23,11 +23,13 @@ import org.apache.ibatis.reflection.ReflectionException;
 import org.apache.ibatis.reflection.property.PropertyTokenizer;
 
 /**
+ * BaseWrapper作为 BeanWrapper和 MapWrapper的父类，为这两个类提供一些共用的基础方法
  * @author Clinton Begin
  */
 public abstract class BaseWrapper implements ObjectWrapper {
 
   protected static final Object[] NO_ARGUMENTS = new Object[0];
+  // 被包装对象的的元对象信息
   protected final MetaObject metaObject;
 
   protected BaseWrapper(MetaObject metaObject) {

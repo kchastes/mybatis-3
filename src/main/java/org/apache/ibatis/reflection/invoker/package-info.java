@@ -14,6 +14,6 @@
  *    limitations under the License.
  */
 /**
- * Unused.
+ * Unused. 反射执行set方法和set方法 以及普通方法
  */
 package org.apache.ibatis.reflection.invoker;

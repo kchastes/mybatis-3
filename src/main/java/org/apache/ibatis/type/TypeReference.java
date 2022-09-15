@@ -20,7 +20,7 @@ import java.lang.reflect.Type;
 
 /**
  * References a generic type.
- *
+ *引用泛型类型
  * @param <T> the referenced type
  * @since 3.1.0
  * @author Simone Tripodi

@@ -15,5 +15,7 @@
  */
 /**
  * Object wrappers.
+ * 对象包装器子包，该子包中的类使用装饰器模式对各种类型的对象
+ * （包括基本 Bean对象、集合对象、Map对象）进行进一步的封装，为其增加一些功能，使它们更易于使用
  */
 package org.apache.ibatis.reflection.wrapper;

@@ -31,6 +31,9 @@ import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
 
+/**
+ * 参数名解析器 用来按顺序列出方法中的虚参，并对实参进行名称标注
+ */
 public class ParamNameResolver {
 
   public static final String GENERIC_NAME_PREFIX = "param";
@@ -49,11 +52,19 @@ public class ParamNameResolver {
    * <li>aMethod(int a, int b) -&gt; {{0, "0"}, {1, "1"}}</li>
    * <li>aMethod(int a, RowBounds rb, int b) -&gt; {{0, "0"}, {2, "1"}}</li>
    * </ul>
+   *
+   * 键是索引，值是参数的名称。 如果指定，则从Param获取名称。未指定Param时，使用参数索引。
+   * 请注意，当方法具有特殊参数（即RowBounds或ResultHandler ）时，此索引可能与实际索引不同。
+   * aMethod(@Param("M") int a, @Param("N") int b) -> {{0, "M"}, {1, "N"}}
+   * aMethod(int a, int b) -> {{0, "0"}, {1, "1"}}
+   * aMethod(int a, RowBounds rb, int b) -> {{0, "0"}, {2, "1"}}
+   *
    */
   private final SortedMap<Integer, String> names;
 
   private boolean hasParamAnnotation;
 
+  // 该方法从三个地方去参数名称，@Param 反射获取参数名，最后使用参数序号
   public ParamNameResolver(Configuration config, Method method) {
     this.useActualParamName = config.isUseActualParamName();
     final Class<?>[] paramTypes = method.getParameterTypes();
@@ -62,6 +73,7 @@ public class ParamNameResolver {
     int paramCount = paramAnnotations.length;
     // get names from @Param annotations
     for (int paramIndex = 0; paramIndex < paramCount; paramIndex++) {
+      // 排除RowBounds和ResultHandler
       if (isSpecialParameter(paramTypes[paramIndex])) {
         // skip special parameters
         continue;
@@ -123,10 +135,13 @@ public class ParamNameResolver {
     final int paramCount = names.size();
     if (args == null || paramCount == 0) {
       return null;
+      // 只有一个参数，并且没有@Param注解
     } else if (!hasParamAnnotation && paramCount == 1) {
       Object value = args[names.firstKey()];
+      // 针对参数是集合处理方式
       return wrapToMapIfCollection(value, useActualParamName ? names.get(0) : null);
     } else {
+      // 会添加默认参数param1,param2...同时还有@Param注解获取的
       final Map<String, Object> param = new ParamMap<>();
       int i = 0;
       for (Map.Entry<Integer, String> entry : names.entrySet()) {
@@ -145,7 +160,7 @@ public class ParamNameResolver {
 
   /**
    * Wrap to a {@link ParamMap} if object is {@link Collection} or array.
-   *
+   *如果对象是Collection或数组，则包装到org.apache.ibatis.binding.MapperMethod.ParamMap 。
    * @param object a parameter object
    * @param actualParamName an actual parameter name
    *                        (If specify a name, set an object to {@link ParamMap} with specified name)
