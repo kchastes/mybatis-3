@@ -78,15 +78,15 @@ public class Reflector {
   public Reflector(Class<?> clazz) {
     // 要被反射的类
     type = clazz;
-    // 设置默认构造器属性
+    // 设置默认构造器属性,如果没有，则defaultConstructor为空
     addDefaultConstructor(clazz);
-
+    // 没有则返回空数组，排除了Object类
     Method[] classMethods = getClassMethods(clazz);
     // record特性兼容
     if (isRecord(type)) {
       addRecordGetMethods(classMethods);
     } else {
-      // 解析所有get
+      // 解析所有get,方法没有参数，以get，is开头的
       addGetMethods(classMethods);
       // 解析所有set
       addSetMethods(classMethods);
@@ -124,30 +124,42 @@ public class Reflector {
     resolveGetterConflicts(conflictingGetters);
   }
 
+  // 选取合适的get方法
   private void resolveGetterConflicts(Map<String, List<Method>> conflictingGetters) {
     for (Entry<String, List<Method>> entry : conflictingGetters.entrySet()) {
+      // 获胜者,幸运儿 哈哈
       Method winner = null;
       String propName = entry.getKey();
+      // 无法选择合适的get方法再使用时会报错
       boolean isAmbiguous = false;
       for (Method candidate : entry.getValue()) {
+        // 先选取第一个，作为初始
         if (winner == null) {
           winner = candidate;
           continue;
         }
+        // 获取方法返回值
         Class<?> winnerType = winner.getReturnType();
         Class<?> candidateType = candidate.getReturnType();
+        // 判断返回值是否一样
         if (candidateType.equals(winnerType)) {
+          // 返回值一样，但是其中一个不是返回boolean直接返回，运行抛出异常，也就是不能存在两个除boolean外的其他getXXX方法
           if (!boolean.class.equals(candidateType)) {
             isAmbiguous = true;
             break;
           } else if (candidate.getName().startsWith("is")) {
+            // 优先取得is
             winner = candidate;
           }
+          // 以下两个判断返回类型是否派生类之类的关系,
         } else if (candidateType.isAssignableFrom(winnerType)) {
+          // candidateType是否是winnerType超类 是则不做处理，也就是说winnerType目前就是子类
           // OK getter type is descendant
         } else if (winnerType.isAssignableFrom(candidateType)) {
+          // 优先取得返回子类的方法
           winner = candidate;
         } else {
+          // 无法区分，含糊不清的
           isAmbiguous = true;
           break;
         }
@@ -171,6 +183,7 @@ public class Reflector {
     Map<String, List<Method>> conflictingSetters = new HashMap<>();
     Arrays.stream(methods).filter(m -> m.getParameterTypes().length == 1 && PropertyNamer.isSetter(m.getName()))
       .forEach(m -> addMethodConflict(conflictingSetters, PropertyNamer.methodToProperty(m.getName()), m));
+
     resolveSetterConflicts(conflictingSetters);
   }
 
@@ -180,7 +193,7 @@ public class Reflector {
       list.add(method);
     }
   }
-
+  // 一个属性可能有多个方法，只选取最合适的
   private void resolveSetterConflicts(Map<String, List<Method>> conflictingSetters) {
     for (Entry<String, List<Method>> entry : conflictingSetters.entrySet()) {
       String propName = entry.getKey();
@@ -207,6 +220,7 @@ public class Reflector {
   }
 
   private Method pickBetterSetter(Method setter1, Method setter2, String property) {
+    // setter2当前  setter1 下一个
     if (setter1 == null) {
       return setter2;
     }
@@ -263,6 +277,7 @@ public class Reflector {
         // modification of final fields through reflection (JSR-133). (JGB)
         // pr #16 - final static can only be set by the classloader
         int modifiers = field.getModifiers();
+        // 不是final，不是static的
         if (!(Modifier.isFinal(modifiers) && Modifier.isStatic(modifiers))) {
           addSetField(field);
         }
@@ -306,9 +321,13 @@ public class Reflector {
    * @return An array containing all methods in this class
    */
   private Method[] getClassMethods(Class<?> clazz) {
+    // key:org.apache.ibatis.cache.Cache#getCache:java.lang.String,...
+    // val: method
     Map<String, Method> uniqueMethods = new HashMap<>();
     Class<?> currentClass = clazz;
+    // 循环获取父类所有方法
     while (currentClass != null && currentClass != Object.class) {
+      // 排除继承方法
       addUniqueMethods(uniqueMethods, currentClass.getDeclaredMethods());
 
       // we also need to look for interface methods -
@@ -329,6 +348,7 @@ public class Reflector {
   private void addUniqueMethods(Map<String, Method> uniqueMethods, Method[] methods) {
     for (Method currentMethod : methods) {
       if (!currentMethod.isBridge()) {
+        //org.apache.ibatis.cache.Cache#getCache:java.lang.String,...
         String signature = getSignature(currentMethod);
         // check to see if the method is already known
         // if it is known, then an extended class must have

@@ -95,7 +95,6 @@ public class XMLConfigBuilder extends BaseBuilder {
 
   private XMLConfigBuilder(XPathParser parser, String environment, Properties props) {
     super(new Configuration());
-    //
     ErrorContext.instance().resource("SQL Mapper Configuration");
     this.configuration.setVariables(props);
     this.parsed = false;
@@ -103,11 +102,13 @@ public class XMLConfigBuilder extends BaseBuilder {
     this.parser = parser;
   }
 
+  // 解析xml配置文件
   public Configuration parse() {
     if (parsed) {
       throw new BuilderException("Each XMLConfigBuilder can only be used once.");
     }
     parsed = true;
+    // 解析配置文件节点，不断填充configuration
     parseConfiguration(parser.evalNode("/configuration"));
     return configuration;
   }
@@ -346,7 +347,7 @@ public class XMLConfigBuilder extends BaseBuilder {
     DatabaseIdProvider databaseIdProvider = null;
     if (context != null) {
       String type = context.getStringAttribute("type");
-      // awful patch to keep backward compatibility
+      // 糟糕的补丁，以保持向后的兼容性
       if ("VENDOR".equals(type)) {
         type = "DB_VENDOR";
       }

@@ -80,7 +80,6 @@ public class VendorDatabaseIdProvider implements DatabaseIdProvider {
       DatabaseMetaData metaData = con.getMetaData();
       return metaData.getDatabaseProductName();
     }
-
   }
 
   private static class LogHolder {

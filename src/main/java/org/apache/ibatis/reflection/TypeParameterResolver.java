@@ -118,10 +118,13 @@ public class TypeParameterResolver {
     Type[] typeArgs = parameterizedType.getActualTypeArguments();
     Type[] args = new Type[typeArgs.length];
     for (int i = 0; i < typeArgs.length; i++) {
+      // TypeVariable代表泛形T
       if (typeArgs[i] instanceof TypeVariable) {
         args[i] = resolveTypeVar((TypeVariable<?>) typeArgs[i], srcType, declaringClass);
       } else if (typeArgs[i] instanceof ParameterizedType) {
+        // ParameterizedType表示已经确定的泛形List<String>
         args[i] = resolveParameterizedType((ParameterizedType) typeArgs[i], srcType, declaringClass);
+        // 通配符？ extends xx
       } else if (typeArgs[i] instanceof WildcardType) {
         args[i] = resolveWildcardType((WildcardType) typeArgs[i], srcType, declaringClass);
       } else {

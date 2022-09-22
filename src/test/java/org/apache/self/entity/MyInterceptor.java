@@ -17,6 +17,10 @@ import org.apache.ibatis.session.RowBounds;
 public class MyInterceptor implements Interceptor {
 
 
+  public MyInterceptor(String name){
+
+  }
+
   @Override
   public Object intercept(Invocation invocation) throws Throwable {
     System.out.println(1);

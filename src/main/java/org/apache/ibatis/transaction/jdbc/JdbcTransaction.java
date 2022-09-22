@@ -116,8 +116,11 @@ public class JdbcTransaction implements Transaction {
     }
   }
 
+  // 是否启用自动提交 关闭连接时启用自动提交
   protected void resetAutoCommit() {
     try {
+      // false false
+      // skipSerAutoxxx是否跳过关闭时启用自动提交默认false，mysql默认自动提交
       if (!skipSetAutoCommitOnClose && !connection.getAutoCommit()) {
         // MyBatis does not call commit/rollback on a connection if just selects were performed.
         // Some databases start transactions with select statements

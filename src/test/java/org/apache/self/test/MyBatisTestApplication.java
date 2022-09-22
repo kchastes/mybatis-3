@@ -1,6 +1,9 @@
 package org.apache.self.test;
 
 import org.apache.ibatis.io.Resources;
+import org.apache.ibatis.reflection.Reflector;
+import org.apache.ibatis.reflection.invoker.Invoker;
+import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
@@ -12,19 +15,55 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * lazyLoadingEnabled
  */
 public class MyBatisTestApplication {
 
+
   private SqlSession sqlSession;
 
-  public static void main(String[] args) {
-    System.out.println(BigDecimal.valueOf(23).compareTo(BigDecimal.ZERO));
+  static class User{
+     private String name;
+     private String age;
+
+    public User getname() {
+      System.out.println("子");
+      return new UserSub();
+    }
+    public User getName() {
+      System.out.println("父");
+      return new User();
+    }
+
+    public void setName(String name) {
+      this.name = name;
+    }
+
+    public String getAge() {
+      return age;
+    }
+
+    public void setAge(String age) {
+      this.age = age;
+    }
+  }
+
+  static class UserSub extends User{
+
+  }
+
+  public static void main(String[] args) throws InvocationTargetException, IllegalAccessException {
+    String str = "123aa";
+    str.replace('f','g');
   }
 
   @Before

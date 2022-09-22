@@ -43,6 +43,11 @@ import org.apache.ibatis.session.SqlSession;
  * @author Eduardo Macarron
  * @author Lasse Voss
  * @author Kazuki Shimizu
+ * 表示数据库操作转化后的方法。每个 MapperMethod对象都对应了一个数据库操作节点
+ *
+ * 因此说 MapperMethod类将一个数据库操作语句和一个 Java方法绑定在了一起：
+ * 它的MethodSignature属性保存了这个方法的详细信息；
+ * 它的 SqlCommand属性持有这个方法对应的 SQL语句
  */
 public class MapperMethod {
 
@@ -203,6 +208,7 @@ public class MapperMethod {
     return result;
   }
 
+  // ParamMap内部类用来存储参数
   public static class ParamMap<V> extends HashMap<String, V> {
 
     private static final long serialVersionUID = -2212268410512043556L;
@@ -216,7 +222,7 @@ public class MapperMethod {
     }
 
   }
-
+  // SqlCommand内部类指代一条SQL语句
   public static class SqlCommand {
 
     private final String name;
@@ -274,6 +280,7 @@ public class MapperMethod {
     }
   }
 
+  // 指代一个具体方法的签名
   public static class MethodSignature {
 
     private final boolean returnsMany;
