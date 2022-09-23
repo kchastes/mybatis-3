@@ -62,8 +62,8 @@ public class MyBatisTestApplication {
   }
 
   public static void main(String[] args) throws InvocationTargetException, IllegalAccessException {
-    String str = "123aa";
-    str.replace('f','g');
+    System.out.println(StudentMapper.class.getName());
+
   }
 
   @Before

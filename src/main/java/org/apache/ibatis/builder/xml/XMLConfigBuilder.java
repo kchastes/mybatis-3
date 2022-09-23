@@ -408,11 +408,14 @@ public class XMLConfigBuilder extends BaseBuilder {
           Class<?> typeHandlerClass = resolveClass(handlerTypeName);
           if (javaTypeClass != null) {
             if (jdbcType == null) {
+              // 指定了java类型，尝试通过@MappedJdbcTypes获取jdbcType
               typeHandlerRegistry.register(javaTypeClass, typeHandlerClass);
             } else {
+              // 全都指定，直接保存即可
               typeHandlerRegistry.register(javaTypeClass, jdbcType, typeHandlerClass);
             }
           } else {
+            // 和包扫描一样，尝试自动发现解析
             typeHandlerRegistry.register(typeHandlerClass);
           }
         }

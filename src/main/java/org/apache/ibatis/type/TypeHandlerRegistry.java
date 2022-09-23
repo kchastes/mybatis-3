@@ -53,14 +53,17 @@ import org.apache.ibatis.session.Configuration;
  * @author Kazuki Shimizu
  */
 public final class TypeHandlerRegistry {
-  // 待添加注释 todo
+  // 存放jdbcType对应的typeHandler
   private final Map<JdbcType, TypeHandler<?>> jdbcTypeHandlerMap = new EnumMap<>(JdbcType.class);
+  // 一个Type类型对应 对应一组jdbcTypeHandlerMap
   private final Map<Type, Map<JdbcType, TypeHandler<?>>> typeHandlerMap = new ConcurrentHashMap<>();
+  // 未知TypeHandler
   private final TypeHandler<Object> unknownTypeHandler;
+  // 存储所有配置的TypeHandler
   private final Map<Class<?>, TypeHandler<?>> allTypeHandlersMap = new HashMap<>();
-
+  // 用于一些初始条件判断。
   private static final Map<JdbcType, TypeHandler<?>> NULL_TYPE_HANDLER_MAP = Collections.emptyMap();
-
+  // 默认的枚举TypeHandler,可通过settings标签修改
   private Class<? extends TypeHandler> defaultEnumTypeHandler = EnumTypeHandler.class;
 
   /**
@@ -342,7 +345,7 @@ public final class TypeHandlerRegistry {
         mappedTypeFound = true;
       }
     }
-    // 在不加注解的情况下尝试自动发现映射类型
+    // 在不加注解的情况下尝试从泛型中自动发现映射类型
     if (!mappedTypeFound && typeHandler instanceof TypeReference) {
 
       try {
@@ -369,11 +372,10 @@ public final class TypeHandlerRegistry {
     MappedJdbcTypes mappedJdbcTypes = typeHandler.getClass().getAnnotation(MappedJdbcTypes.class);
     // 是否添加MappedJdbcTypes注解
     if (mappedJdbcTypes != null) {
-
       for (JdbcType handledJdbcType : mappedJdbcTypes.value()) {
         register(javaType, handledJdbcType, typeHandler);
       }
-      // jdbc NULL类型处理
+      // 返回是否映射到 jdbc null类型
       if (mappedJdbcTypes.includeNullJdbcType()) {
         register(javaType, null, typeHandler);
       }
@@ -404,8 +406,7 @@ public final class TypeHandlerRegistry {
       }
       // 添加 jdbcType-> 类型控制器
       map.put(jdbcType, handler);
-      // 一个java类型对应多个jdbc控制器  String: varchar->handler
-                                    //       int -> handler
+      // 一个java类型对应多个jdbc控制器
       typeHandlerMap.put(javaType, map);
     }
     // 保存再allTypeHandlersMap中
@@ -418,6 +419,7 @@ public final class TypeHandlerRegistry {
 
   // Only handler type
 
+  // 通过注解自动发现映射关系
   public void register(Class<?> typeHandlerClass) {
     boolean mappedTypeFound = false;
     // 获取类上的java类型注解
