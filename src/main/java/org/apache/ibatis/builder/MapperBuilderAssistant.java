@@ -57,8 +57,8 @@ public class MapperBuilderAssistant extends BaseBuilder {
 
   private String currentNamespace;
   private final String resource;
-  private Cache currentCache;
-  private boolean unresolvedCacheRef; // issue #676
+  private Cache currentCache;// 如果是缓存引用 则是别的namespace中的缓存 否则是新创建的。
+  private boolean unresolvedCacheRef; // issue #676 是否找到缓存
 
   public MapperBuilderAssistant(Configuration configuration, String resource) {
     super(configuration);

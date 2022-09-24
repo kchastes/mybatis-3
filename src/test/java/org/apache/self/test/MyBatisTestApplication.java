@@ -62,7 +62,8 @@ public class MyBatisTestApplication {
   }
 
   public static void main(String[] args) throws InvocationTargetException, IllegalAccessException {
-    System.out.println(StudentMapper.class.getName());
+    String str = "abt-";
+    System.out.println(str.split("-")[0]);
 
   }
 

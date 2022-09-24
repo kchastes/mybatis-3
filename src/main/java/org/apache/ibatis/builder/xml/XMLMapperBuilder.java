@@ -125,7 +125,6 @@ public class XMLMapperBuilder extends BaseBuilder {
       cacheElement(context.evalNode("cache"));
       // 配置parameterMap 已废弃 不再研究 老式风格的参数映射。此元素已被废弃，并可能在将来被移除！请使用行内参数映射。文档中不会介绍此元素。
       parameterMapElement(context.evalNodes("/mapper/parameterMap"));
-
       // 解析resultMap标签 子项为resultMapping,最终转为resultMap对象
       // resultMap中的每一个标签都是resultMapping
       resultMapElements(context.evalNodes("/mapper/resultMap"));

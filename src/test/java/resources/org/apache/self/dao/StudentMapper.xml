@@ -6,12 +6,19 @@
 <mapper namespace="org.apache.self.dao.StudentMapper">
 
 
+  <resultMap id="123" type="">
+    <constructor>
+      <idArg name="" column=""></idArg>
+      <arg name="" column=""></arg>
+      <arg name="" column=""></arg>
+    </constructor>
+  </resultMap>
+
   <select id="selectStudentById" resultType="Student">
     select *
     from Student
     where id = #{id}
   </select>
-
   <insert id="insertStudent" parameterType="Student"  keyProperty="id"
      useGeneratedKeys="true" timeout="20">
     insert into Student (username,age,birthday,classId)
