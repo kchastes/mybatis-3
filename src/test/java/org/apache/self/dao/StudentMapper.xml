@@ -5,13 +5,9 @@
 
 <mapper namespace="org.apache.self.dao.StudentMapper">
 
-
-  <resultMap id="123" type="">
-    <constructor>
-      <idArg name="" column=""></idArg>
-      <arg name="" column=""></arg>
-      <arg name="" column=""></arg>
-    </constructor>
+  <resultMap id="123" type="student">
+    <collection property="ass" >
+    </collection>
   </resultMap>
 
   <select id="selectStudentById" resultType="Student">

@@ -54,7 +54,6 @@ public class Plugin implements InvocationHandler {
           interfaces,
           new Plugin(target, interceptor, signatureMap));
     }
-
     return target;
   }
 

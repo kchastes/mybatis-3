@@ -3,6 +3,7 @@ package org.apache.self.entity;
 import org.apache.ibatis.annotations.Param;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class Student {
 
@@ -12,6 +13,16 @@ public class Student {
   private LocalDateTime birthday;
   private Integer classId;
   private ClassRoom classRoom;
+  private List<String> ass;
+
+
+  public List<String> getAss() {
+    return ass;
+  }
+
+  public void setAss(List<String> ass) {
+    this.ass = ass;
+  }
 
   public Student() {
   }

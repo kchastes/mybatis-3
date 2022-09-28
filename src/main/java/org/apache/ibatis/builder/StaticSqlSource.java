@@ -24,6 +24,8 @@ import org.apache.ibatis.session.Configuration;
 
 /**
  * @author Clinton Begin
+ *
+ * 静态语句。语句中可能含有“？”，可以直接提交给数据库执行
  */
 public class StaticSqlSource implements SqlSource {
 

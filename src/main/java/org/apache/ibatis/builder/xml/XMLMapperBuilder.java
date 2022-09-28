@@ -292,7 +292,7 @@ public class XMLMapperBuilder extends BaseBuilder {
         //解析discriminator标签
         discriminator = processDiscriminatorElement(resultChild, typeClass, resultMappings);
       } else {
-        // 解析普通标签
+        // 解析普通标签<id><result><collection>....
         List<ResultFlag> flags = new ArrayList<>();
         if ("id".equals(resultChild.getName())) {
           flags.add(ResultFlag.ID);
@@ -376,14 +376,17 @@ public class XMLMapperBuilder extends BaseBuilder {
       }
     }
   }
-
+  // test1 flag
+  // null null
   private boolean databaseIdMatchesCurrent(String id, String databaseId, String requiredDatabaseId) {
     if (requiredDatabaseId != null) {
       return requiredDatabaseId.equals(databaseId);
     }
+    // 没有configuration的databaseId，但是缺添加了databaseId属性，则不添加
     if (databaseId != null) {
       return false;
     }
+    // 不存在进行添加
     if (!this.sqlFragments.containsKey(id)) {
       return true;
     }
@@ -423,6 +426,7 @@ public class XMLMapperBuilder extends BaseBuilder {
   private String processNestedResultMappings(XNode context, List<ResultMapping> resultMappings, Class<?> enclosingType) {
     if (Arrays.asList("association", "collection", "case").contains(context.getName())
         && context.getStringAttribute("select") == null) {
+      // 验证resultMap中是否包含指定属性set方法
       validateCollection(context, enclosingType);
       ResultMap resultMap = resultMapElement(context, resultMappings, enclosingType);
       return resultMap.getId();

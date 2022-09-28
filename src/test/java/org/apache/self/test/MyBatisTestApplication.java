@@ -1,9 +1,6 @@
 package org.apache.self.test;
 
 import org.apache.ibatis.io.Resources;
-import org.apache.ibatis.reflection.Reflector;
-import org.apache.ibatis.reflection.invoker.Invoker;
-import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
@@ -16,12 +13,8 @@ import org.junit.Test;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * lazyLoadingEnabled
@@ -77,7 +70,7 @@ public class MyBatisTestApplication {
   @Test
   public void firstTest() {
       StudentMapper studentMapper = sqlSession.getMapper(StudentMapper.class);
-      Student student = studentMapper.selectStudentById(1);
+      Student student = studentMapper.selectStudentById(2);
       //student = studentMapper.selectStudentById(1);
       System.out.println(student);
   }
